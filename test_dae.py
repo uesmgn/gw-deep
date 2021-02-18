@@ -136,10 +136,10 @@ def main(args):
                     num_samples += len(x)
 
                 for x, target in tqdm(samples_set):
-                    x = x.to(device, non_blocking=True)
-                    z, x_rec = model.get_params(x)
-                    x = x.cpu().numpy()
-                    x_rec = x_rec.cpu().numpy()
+                    x = x.to(device, non_blocking=True).unsqueeze(0)
+                    _, x_rec = model.get_params(x)
+                    x = x.cpu().numpy().squeeze()
+                    x_rec = x_rec.cpu().numpy().squeeze()
                     fig, ax = plt.subplots()
                     ax.imshow(x[0], cmap="gray")
                     plt.tight_layout()
