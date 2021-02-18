@@ -38,7 +38,7 @@ def main(args):
     target_transform = transforms.ToIndex(args.labels)
 
     random_state = 123
-    batch_size = 128
+    batch_size = 96
     num_classes = 22
     dataset_root = "/home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5"
 
@@ -81,7 +81,7 @@ def main(args):
             x, x_ = x.to(device, non_blocking=True), x_.to(device, non_blocking=True)
             _, _, z = model(x)
             bce, kl_gauss, z_ = model(x_)
-            cosine_distance = torch.sqrt((z - z_) ** 2)
+            cosine_distance = torch.sqrt((z - z_) ** 2).sum()
             loss = sum([bce, kl_gauss, cosine_distance])
             optim.zero_grad()
             loss.backward()
@@ -107,8 +107,7 @@ def main(args):
             with torch.no_grad():
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
-                    bce, kl_gauss = model(x)
-                    z = model.get_params(x)
+                    bce, kl_gauss, z = model(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
