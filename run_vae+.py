@@ -69,6 +69,7 @@ def main(args):
     model = models.VAE(4, 512).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=1e-4)
     stats_train, stats_test = defaultdict(list), defaultdict(list)
+    sim = nn.CosineSimilarity(dim=1, eps=1e-8)
     for epoch in range(100):
         print(f"----- training at epoch {epoch} -----")
         model.train()
@@ -78,7 +79,7 @@ def main(args):
             x, x_ = x.to(device, non_blocking=True), x_.to(device, non_blocking=True)
             _, _, z = model(x)
             bce, kl_gauss, z_ = model(x_)
-            cosine_distance = torch.sqrt((z - z_) ** 2).sum()
+            cosine_distance = (1 - sim(z, z_)).sum()
             loss = sum([bce, kl_gauss, cosine_distance])
             optim.zero_grad()
             loss.backward()
