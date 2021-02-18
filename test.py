@@ -104,7 +104,6 @@ def main(args):
         loss_dict_train = defaultdict(lambda: 0)
         for x, _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
-            x_ = x_.to(device, non_blocking=True)
             bce, kl_gauss = model(x)
             loss = sum([bce, kl_gauss])
             optim.zero_grad()

@@ -6,6 +6,9 @@ from collections import abc
 from .basic import *
 
 
+__all__ = ["VAE"]
+
+
 class Encoder(nn.Module):
     def __init__(self, in_channels: int, out_dim: int):
         super().__init__()
@@ -22,21 +25,18 @@ class Encoder(nn.Module):
             nn.Linear(512, out_dim * 2),
         )
 
-    def _reparameterize(self, mean, logvar, L=1):
+    def reparameterize(self, mean, logvar, L=1):
         mean = mean.repeat(L, 1, 1).squeeze()
         logvar = logvar.repeat(L, 1, 1).squeeze()
         z = mean + torch.randn_like(mean) * torch.exp(0.5 * logvar)
         return z
 
-    def forward(self, x, reparameterize=True, L=1):
+    def forward(self, x, L=1):
         x = self.blocks(x)
         x = self.logits(x)
-        if reparameterize:
-            mean, logvar = torch.split(x, x.shape[-1] // 2, -1)
-            z = self._reparameterize(mean, logvar, L).view(x.shape[0] * L, -1)
-            return z, mean, logvar
-        else:
-            return x
+        mean, logvar = torch.split(x, x.shape[-1] // 2, -1)
+        z = self.reparameterize(mean, logvar, L).view(x.shape[0] * L, -1)
+        return z, mean, logvar
 
 
 class Decoder(nn.Module):
@@ -61,30 +61,6 @@ class Decoder(nn.Module):
         x = x.view(x.shape[0], -1, self.msize, self.msize)
         x = self.blocks(x)
         return x
-
-
-class DAE(nn.Module):
-    def __init__(self, in_channels: int = 3, z_dim: int = 512, msize: int = 7):
-        super().__init__()
-        self.encoder = Encoder(in_channels, z_dim // 2)
-        self.decoder = Decoder(z_dim, in_channels, msize)
-
-    def forward(self, x, x_noized=None):
-        if self.training:
-            z = self.encoder(x_noized, reparameterize=False)
-        else:
-            z = self.encoder(x, reparameterize=False)
-        x_rec = self.decoder(z)
-        bce = self.bce(x_rec, x)
-        return bce
-
-    def bce(self, x_rec, x):
-        return F.binary_cross_entropy_with_logits(x_rec, x, reduction="none").mean(dim=[-1, -2]).sum()
-
-    def get_params(self, x):
-        z = self.encoder(x, reparameterize=False)
-        x_rec = self.decoder(z)
-        return z, x_rec
 
 
 class VAE(nn.Module):
