@@ -39,7 +39,7 @@ def main(args):
 
     random_state = 123
     batch_size = 128
-    num_classes = 22
+    num_classes = len(args.labels)
     dataset_root = "/home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5"
 
     dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)

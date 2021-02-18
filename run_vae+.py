@@ -20,7 +20,7 @@ plt.rcParams["text.usetex"] = True
 plt.rc("legend", fontsize=10)
 
 
-@hydra.main(config_path="config", config_name="vae")
+@hydra.main(config_path="config", config_name="vae+")
 def main(args):
     transform = tf.Compose(
         [
@@ -37,18 +37,15 @@ def main(args):
     )
     target_transform = transforms.ToIndex(args.labels)
 
-    random_state = 123
-    batch_size = 96
-    num_classes = 22
-    dataset_root = "/home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5"
+    num_classes = len(args.labels)
 
-    dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
-    train_set, test_set = dataset.split(train_size=0.8, random_state=random_state, stratify=dataset.targets)
+    dataset = datasets.HDF5(args.dataset_path, transform=transform, target_transform=target_transform)
+    train_set, test_set = dataset.split(train_size=0.8, random_state=args.random_state, stratify=dataset.targets)
     train_set = train_set.co(augment)
 
     train_loader = torch.utils.data.DataLoader(
         train_set,
-        batch_size=batch_size,
+        batch_size=args.batch_size,
         num_workers=os.cpu_count(),
         sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples=12800),
         pin_memory=True,
@@ -56,7 +53,7 @@ def main(args):
     )
     test_loader = torch.utils.data.DataLoader(
         test_set,
-        batch_size=batch_size,
+        batch_size=args.batch_size,
         num_workers=os.cpu_count(),
         pin_memory=True,
         drop_last=False,
@@ -147,7 +144,7 @@ def main(args):
                 plt.close()
 
             print("t-SNE decomposing...")
-            qz_tsne = TSNE(n_components=2, metric="cosine", random_state=random_state).fit(z).embedding_
+            qz_tsne = TSNE(n_components=2, metric="cosine", random_state=args.random_state).fit(z).embedding_
 
             print(f"Plotting 2D latent features with true labels...")
             fig, ax = plt.subplots()
