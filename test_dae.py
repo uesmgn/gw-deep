@@ -69,7 +69,7 @@ def main(args):
 
     dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
     train_set, test_set = dataset.split(train_size=0.8, random_state=random_state, stratify=dataset.targets)
-    train_set = datasets.co(train_set, augment)
+    train_set = train_set.co(augment)
 
     train_loader = torch.utils.data.DataLoader(
         train_set,
