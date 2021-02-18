@@ -6,7 +6,7 @@ from collections import abc
 from .basic import *
 
 
-__all__ = ["VAE", "VAE_co"]
+__all__ = ["VAE"]
 
 
 class Encoder(nn.Module):
