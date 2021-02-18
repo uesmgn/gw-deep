@@ -11,6 +11,7 @@ from sklearn.manifold import TSNE
 import src.data.datasets as datasets
 import src.nn.models as models
 import src.utils.transforms as transforms
+import src.utils.functional as F
 
 transform = tf.Compose(
     [
@@ -54,6 +55,7 @@ target_transform = transforms.ToIndex(
 
 random_state = 123
 batch_size = 128
+num_classes = 22
 dataset_root = "/home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5"
 
 dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
@@ -119,6 +121,7 @@ for epoch in range(100):
                 x = x.to(device, non_blocking=True)
                 bce, kl_gauss = model(x)
                 z = model.get_params(x)
+                params["y"].append(target)
                 params["z"].append(z)
                 loss_dict_test["total"] += loss.item()
                 loss_dict_test["binary_cross_entropy"] += bce.item()
@@ -130,5 +133,23 @@ for epoch in range(100):
             loss_dict_test[key] = value
             print(f"{key}: {value:.3f} at epoch: {epoch}")
 
-        z = torch.cat(params["z"])
-        print(z.shape)
+        y = np.array(params["y"]).astype(int)
+        z = np.concatenate(params["z"])
+
+        print("t-SNE decomposing...")
+        qz_tsne = TSNE(n_components=2, metric="cosine", random_state=args.seed).fit(z).embedding_
+
+        print(f"Plotting 2D latent features with true labels...")
+        fig, ax = plt.subplots()
+        cmap = F.segmented_cmap(num_classes, "tab10")
+        for i in range(num_classes):
+            idx = np.where(y == i)[0]
+            if len(idx) > 0:
+                c = cmap(i)
+                ax.scatter(qz_tsne[idx, 0], qz_tsne[idx, 1], color=c, label=i)
+            ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
+            ax.set_title(f"t-SNE 2D plot of latent code at epoch {epoch}")
+            ax.set_aspect(1.0 / ax.get_data_ratio())
+            plt.tight_layout()
+            plt.savefig(f"z_true_e{epoch}.png")
+            plt.close()
