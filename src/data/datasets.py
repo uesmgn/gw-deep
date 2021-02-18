@@ -6,6 +6,7 @@ from collections import abc, defaultdict
 import numpy as np
 from sklearn.model_selection import train_test_split
 import copy
+import torchvision.transforms as transforms
 
 __class__ = ["HDF5"]
 
@@ -88,5 +89,5 @@ class HDF5(torch.utils.data.Dataset):
         return x
 
     def co(self, augment):
-        self.transform = lambda x: (self.transform(x), augment(x))
+        self.transform = transforms.Lambda(lambda x: (self.transform(x), augment(x)))
         return self
