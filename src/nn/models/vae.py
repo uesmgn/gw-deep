@@ -6,7 +6,7 @@ from collections import abc
 from .basic import *
 
 
-__all__ = ["VAE"]
+__all__ = ["VAE", "VAE_co"]
 
 
 class Encoder(nn.Module):
@@ -75,7 +75,7 @@ class VAE(nn.Module):
         x_duplicated = x.repeat(L, 1, 1, 1) if L > 1 else x
         bce = self.bce(x_rec, x_duplicated) / L
         kl_gauss = self.kl_gauss(mean, logvar)
-        return bce, kl_gauss
+        return bce, kl_gauss, mean
 
     def bce(self, x_rec, x):
         return F.binary_cross_entropy_with_logits(x_rec, x, reduction="none").mean(dim=[-1, -2]).sum()

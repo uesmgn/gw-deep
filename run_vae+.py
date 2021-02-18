@@ -20,7 +20,7 @@ plt.rcParams["text.usetex"] = True
 plt.rc("legend", fontsize=10)
 
 
-@hydra.main(config_path="config", config_name="test")
+@hydra.main(config_path="config", config_name="vae")
 def main(args):
     transform = tf.Compose(
         [
@@ -35,32 +35,7 @@ def main(args):
             tf.CenterCrop(224),
         ]
     )
-    target_transform = transforms.ToIndex(
-        [
-            "1080Lines",
-            "1400Ripples",
-            "Air_Compressor",
-            "Blip",
-            "Chirp",
-            "Extremely_Loud",
-            "Helix",
-            "Koi_Fish",
-            "Light_Modulation",
-            "Low_Frequency_Burst",
-            "Low_Frequency_Lines",
-            "No_Glitch",
-            "None_of_the_Above",
-            "Paired_Doves",
-            "Power_Line",
-            "Repeating_Blips",
-            "Scattered_Light",
-            "Scratchy",
-            "Tomte",
-            "Violin_Mode",
-            "Wandering_Line",
-            "Whistle",
-        ]
-    )
+    target_transform = transforms.ToIndex(args.labels)
 
     random_state = 123
     batch_size = 128
@@ -70,7 +45,6 @@ def main(args):
     dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
     train_set, test_set = dataset.split(train_size=0.8, random_state=random_state, stratify=dataset.targets)
     train_set = train_set.co(augment)
-    samples_set = test_set.sample(num_per_class=1)
 
     train_loader = torch.utils.data.DataLoader(
         train_set,
@@ -95,8 +69,8 @@ def main(args):
     else:
         device = torch.device("cpu")
 
-    model = models.DAE(4, 512).to(device)
-    optim = torch.optim.Adam(model.parameters(), lr=5e-4)
+    model = models.VAE(4, 512).to(device)
+    optim = torch.optim.Adam(model.parameters(), lr=1e-4)
     stats_train, stats_test = defaultdict(list), defaultdict(list)
     for epoch in range(100):
         print(f"----- training at epoch {epoch} -----")
@@ -104,13 +78,18 @@ def main(args):
         num_samples = 0
         loss_dict_train = defaultdict(lambda: 0)
         for (x, x_), _ in tqdm(train_loader):
-            x = x.to(device, non_blocking=True)
-            x_ = x_.to(device, non_blocking=True)
-            loss = model(x, x_)
+            x, x_ = x.to(device, non_blocking=True), x_.to(device, non_blocking=True)
+            bce, kl_gauss, z = model(x)
+            bce_, kl_gauss_, z_ = model(x_)
+            cosine_distance = torch.sqrt((z - z_) ** 2)
+            loss = sum([bce, kl_gauss, bce_, kl_gauss_, cosine_distance])
             optim.zero_grad()
             loss.backward()
             optim.step()
             loss_dict_train["total"] += loss.item()
+            loss_dict_train["binary_cross_entropy"] += (bce + bce_).item()
+            loss_dict_train["kl_divergence"] += (kl_gauss + kl_gauss_).item()
+            loss_dict_train["cosine_distance"] += cosine_distance.item()
             num_samples += len(x)
 
         for key, value in loss_dict_train.items():
@@ -126,31 +105,16 @@ def main(args):
             params = defaultdict(list)
 
             with torch.no_grad():
-                for i, (x, target) in tqdm(enumerate(test_loader)):
+                for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
-                    loss = model(x)
-                    z, x_rec = model.get_params(x)
+                    bce, kl_gauss = model(x)
+                    z = model.get_params(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
+                    loss_dict_test["binary_cross_entropy"] += bce.item()
+                    loss_dict_test["kl_divergence"] += kl_gauss.item()
                     num_samples += len(x)
-
-                for x, target in tqdm(samples_set):
-                    x = x.to(device, non_blocking=True).unsqueeze(0)
-                    _, x_rec = model.get_params(x)
-                    x = x.cpu().numpy().squeeze()
-                    x_rec = x_rec.cpu().numpy().squeeze()
-                    fig, ax = plt.subplots()
-                    ax.imshow(x[0], cmap="gray")
-                    plt.tight_layout()
-                    plt.savefig(f"orig_e{epoch}_s{i}.png")
-                    plt.close()
-
-                    fig, ax = plt.subplots()
-                    ax.imshow(x_rec[0], cmap="gray")
-                    plt.tight_layout()
-                    plt.savefig(f"rec_e{epoch}_s{i}.png")
-                    plt.close()
 
             for key, value in loss_dict_test.items():
                 value /= num_samples
@@ -200,6 +164,9 @@ def main(args):
             plt.tight_layout()
             plt.savefig(f"z_true_e{epoch}.png")
             plt.close()
+
+        if epoch % 50 == 0:
+            torch.save(model.state_dict(), args.model_path)
 
 
 if __name__ == "__main__":

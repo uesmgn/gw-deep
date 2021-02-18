@@ -20,7 +20,7 @@ plt.rcParams["text.usetex"] = True
 plt.rc("legend", fontsize=10)
 
 
-@hydra.main(config_path="config", config_name="test")
+@hydra.main(config_path="config", config_name="vae")
 def main(args):
     transform = tf.Compose(
         [
@@ -35,32 +35,7 @@ def main(args):
             tf.CenterCrop(224),
         ]
     )
-    target_transform = transforms.ToIndex(
-        [
-            "1080Lines",
-            "1400Ripples",
-            "Air_Compressor",
-            "Blip",
-            "Chirp",
-            "Extremely_Loud",
-            "Helix",
-            "Koi_Fish",
-            "Light_Modulation",
-            "Low_Frequency_Burst",
-            "Low_Frequency_Lines",
-            "No_Glitch",
-            "None_of_the_Above",
-            "Paired_Doves",
-            "Power_Line",
-            "Repeating_Blips",
-            "Scattered_Light",
-            "Scratchy",
-            "Tomte",
-            "Violin_Mode",
-            "Wandering_Line",
-            "Whistle",
-        ]
-    )
+    target_transform = transforms.ToIndex(args.labels)
 
     random_state = 123
     batch_size = 128
@@ -104,7 +79,7 @@ def main(args):
         loss_dict_train = defaultdict(lambda: 0)
         for x, _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
-            bce, kl_gauss = model(x)
+            bce, kl_gauss, _ = model(x)
             loss = sum([bce, kl_gauss])
             optim.zero_grad()
             loss.backward()
@@ -129,8 +104,7 @@ def main(args):
             with torch.no_grad():
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
-                    bce, kl_gauss = model(x)
-                    z = model.get_params(x)
+                    bce, kl_gauss, z = model(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
@@ -186,6 +160,9 @@ def main(args):
             plt.tight_layout()
             plt.savefig(f"z_true_e{epoch}.png")
             plt.close()
+
+        if epoch % 50 == 0:
+            torch.save(model.state_dict(), args.model_path)
 
 
 if __name__ == "__main__":
