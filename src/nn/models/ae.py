@@ -69,9 +69,9 @@ class DAE(nn.Module):
         self.encoder = Encoder(in_channels, z_dim // 2)
         self.decoder = Decoder(z_dim, in_channels, msize)
 
-    def forward(self, x, x_=None):
+    def forward(self, x, x_noized=None):
         if self.training:
-            z = self.encoder(x_, reparameterize=False)
+            z = self.encoder(x_noized, reparameterize=False)
         else:
             z = self.encoder(x, reparameterize=False)
         x_rec = self.decoder(z)
@@ -83,7 +83,8 @@ class DAE(nn.Module):
 
     def get_params(self, x):
         z = self.encoder(x, reparameterize=False)
-        return z
+        x_rec = self.decoder(z)
+        return z, x_rec
 
 
 class VAE(nn.Module):

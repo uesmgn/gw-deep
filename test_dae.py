@@ -70,6 +70,7 @@ def main(args):
     dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
     train_set, test_set = dataset.split(train_size=0.8, random_state=random_state, stratify=dataset.targets)
     train_set = train_set.co(augment)
+    samples_set = test_set.sample(num_per_class=1)
 
     train_loader = torch.utils.data.DataLoader(
         train_set,
@@ -125,14 +126,31 @@ def main(args):
             params = defaultdict(list)
 
             with torch.no_grad():
-                for x, target in tqdm(test_loader):
+                for i, (x, target) in tqdm(enumerate(test_loader)):
                     x = x.to(device, non_blocking=True)
                     loss = model(x)
-                    z = model.get_params(x)
+                    z, x_rec = model.get_params(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
                     num_samples += len(x)
+
+                for x, target in tqdm(samples_set):
+                    x = x.to(device, non_blocking=True)
+                    z, x_rec = model.get_params(x)
+                    x = x.cpu().numpy()
+                    x_rec = x_rec.cpu().numpy()
+                    fig, ax = plt.subplots()
+                    ax.imshow(x[0], cmap="gray")
+                    plt.tight_layout()
+                    plt.savefig(f"orig_e{epoch}_s{i}.png")
+                    plt.close()
+
+                    fig, ax = plt.subplots()
+                    ax.imshow(x_rec[0], cmap="gray")
+                    plt.tight_layout()
+                    plt.savefig(f"rec_e{epoch}_s{i}.png")
+                    plt.close()
 
             for key, value in loss_dict_test.items():
                 value /= num_samples

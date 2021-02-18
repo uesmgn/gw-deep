@@ -64,6 +64,15 @@ class HDF5(torch.utils.data.Dataset):
         self.cache = [self.cache[i] for i in idx]
         return self
 
+    def sample(self, num_per_class=1):
+        tmp = []
+        targets = np.array(self.targets)
+        for t in np.unique(targets):
+            idx = np.where(targets == t)[0]
+            np.random.shuffle(idx)
+            tmp.extend(idx[:num_per_class])
+        return copy.copy(self).select(tmp)
+
     def init_cache(self):
         self.cache = []
         with self.open(self.root) as f:
