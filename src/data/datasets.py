@@ -89,5 +89,6 @@ class HDF5(torch.utils.data.Dataset):
         return x
 
     def co(self, augment):
-        self.transform = transforms.Lambda(lambda x: (self.transform(x), augment(x)))
+        transform = self.transform
+        self.transform = transforms.Lambda(lambda x: (transform(x), augment(x)))
         return self
