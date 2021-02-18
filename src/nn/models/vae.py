@@ -72,7 +72,7 @@ class DAE(nn.Module):
     def forward(self, x, x_):
         z = self.encoder(x_, reparameterize=False)
         x_rec = self.decoder(z)
-        bce = self.bce(x_rec, x) / L
+        bce = self.bce(x_rec, x)
         return bce
 
     def bce(self, x_rec, x):
