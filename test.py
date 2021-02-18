@@ -96,7 +96,7 @@ def main(args):
 
     model = models.VAE(4, 512).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=1e-4)
-
+    stats_train, stats_test = defaultdict(list), defaultdict(list)
     for epoch in range(100):
         print(f"----- training at epoch {epoch} -----")
         model.train()
@@ -118,6 +118,7 @@ def main(args):
             value /= num_samples
             loss_dict_train[key] = value
             print(f"{key}: {value:.3f} at epoch: {epoch}")
+            stats_train[key].append(value)
 
         if epoch % 5 == 0:
             print(f"----- evaluating at epoch {epoch} -----")
@@ -141,9 +142,32 @@ def main(args):
                 value /= num_samples
                 loss_dict_test[key] = value
                 print(f"{key}: {value:.3f} at epoch: {epoch}")
+                stats_test[key].append(value)
 
             y = torch.cat(params["y"]).int().numpy()
             z = torch.cat(params["z"]).cpu().numpy()
+
+            for key, value in stats_train.items():
+                xx = np.linspace(0, epoch, len(value))
+                plt.plot(xx, value)
+                plt.ylabel(key.replace("_", " "))
+                plt.xlabel("epoch")
+                plt.title(key.replace("_", " "))
+                plt.xlim(0, epoch)
+                plt.tight_layout()
+                plt.savefig(f"{key}_train_e{epoch}.png")
+                plt.close()
+
+            for key, value in stats_test.items():
+                xx = np.linspace(0, epoch, len(value))
+                plt.plot(xx, value)
+                plt.ylabel(key.replace("_", " "))
+                plt.xlabel("epoch")
+                plt.title(key.replace("_", " "))
+                plt.xlim(0, epoch)
+                plt.tight_layout()
+                plt.savefig(f"{key}_test_e{epoch}.png")
+                plt.close()
 
             print("t-SNE decomposing...")
             qz_tsne = TSNE(n_components=2, metric="cosine", random_state=random_state).fit(z).embedding_
