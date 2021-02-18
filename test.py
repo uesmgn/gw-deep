@@ -14,6 +14,11 @@ import src.nn.models as models
 import src.utils.transforms as transforms
 import src.utils.functional as F
 
+plt.style.use("seaborn-poster")
+plt.rcParams["lines.markersize"] = 6.0
+plt.rcParams["text.usetex"] = True
+plt.rc("legend", fontsize=10)
+
 
 @hydra.main(config_path="config", config_name="test")
 def main(args):
