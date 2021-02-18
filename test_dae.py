@@ -96,7 +96,7 @@ def main(args):
         device = torch.device("cpu")
 
     model = models.DAE(4, 512).to(device)
-    optim = torch.optim.Adam(model.parameters(), lr=1e-4)
+    optim = torch.optim.Adam(model.parameters(), lr=5e-4)
     stats_train, stats_test = defaultdict(list), defaultdict(list)
     for epoch in range(100):
         print(f"----- training at epoch {epoch} -----")
