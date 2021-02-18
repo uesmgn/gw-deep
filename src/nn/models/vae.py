@@ -69,8 +69,11 @@ class DAE(nn.Module):
         self.encoder = Encoder(in_channels, z_dim // 2)
         self.decoder = Decoder(z_dim, in_channels, msize)
 
-    def forward(self, x, x_):
-        z = self.encoder(x_, reparameterize=False)
+    def forward(self, x, x_=None):
+        if self.training:
+            z = self.encoder(x_, reparameterize=False)
+        else:
+            z = self.encoder(x, reparameterize=False)
         x_rec = self.decoder(z)
         bce = self.bce(x_rec, x)
         return bce
