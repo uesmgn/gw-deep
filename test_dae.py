@@ -69,7 +69,7 @@ def main(args):
 
     dataset = datasets.HDF5(dataset_root, transform=transform, target_transform=target_transform)
     train_set, test_set = dataset.split(train_size=0.8, random_state=random_state, stratify=dataset.targets)
-    train_set.transform = augment
+    train_set = train_set.co(augment)
 
     train_loader = torch.utils.data.DataLoader(
         train_set,
@@ -94,7 +94,7 @@ def main(args):
     else:
         device = torch.device("cpu")
 
-    model = models.VAE(4, 512).to(device)
+    model = models.DAE(4, 512).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=1e-4)
     stats_train, stats_test = defaultdict(list), defaultdict(list)
     for epoch in range(100):
@@ -102,17 +102,14 @@ def main(args):
         model.train()
         num_samples = 0
         loss_dict_train = defaultdict(lambda: 0)
-        for x, _ in tqdm(train_loader):
+        for (x, x_), _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
             x_ = x_.to(device, non_blocking=True)
-            bce, kl_gauss = model(x)
-            loss = sum([bce, kl_gauss])
+            loss = model(x, x_)
             optim.zero_grad()
             loss.backward()
             optim.step()
             loss_dict_train["total"] += loss.item()
-            loss_dict_train["binary_cross_entropy"] += bce.item()
-            loss_dict_train["kl_divergence"] += kl_gauss.item()
             num_samples += len(x)
 
         for key, value in loss_dict_train.items():
@@ -130,13 +127,11 @@ def main(args):
             with torch.no_grad():
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
-                    bce, kl_gauss = model(x)
+                    loss = model(x)
                     z = model.get_params(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
-                    loss_dict_test["binary_cross_entropy"] += bce.item()
-                    loss_dict_test["kl_divergence"] += kl_gauss.item()
                     num_samples += len(x)
 
             for key, value in loss_dict_test.items():

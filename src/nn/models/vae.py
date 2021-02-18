@@ -28,12 +28,15 @@ class Encoder(nn.Module):
         z = mean + torch.randn_like(mean) * torch.exp(0.5 * logvar)
         return z
 
-    def forward(self, x, L=1):
+    def forward(self, x, reparameterize=True, L=1):
         x = self.blocks(x)
         x = self.logits(x)
-        mean, logvar = torch.split(x, x.shape[-1] // 2, -1)
-        z = self._reparameterize(mean, logvar, L).view(x.shape[0] * L, -1)
-        return z, mean, logvar
+        if reparameterize:
+            mean, logvar = torch.split(x, x.shape[-1] // 2, -1)
+            z = self._reparameterize(mean, logvar, L).view(x.shape[0] * L, -1)
+            return z, mean, logvar
+        else:
+            return x
 
 
 class Decoder(nn.Module):
@@ -60,6 +63,26 @@ class Decoder(nn.Module):
         return x
 
 
+class DAE(nn.Module):
+    def __init__(self, in_channels: int = 3, z_dim: int = 512, msize: int = 7):
+        super().__init__()
+        self.encoder = Encoder(in_channels, z_dim // 2)
+        self.decoder = Decoder(z_dim, in_channels, msize)
+
+    def forward(self, x, x_):
+        z = self.encoder(x_, reparameterize=False)
+        x_rec = self.decoder(z)
+        bce = self.bce(x_rec, x) / L
+        return bce
+
+    def bce(self, x_rec, x):
+        return F.binary_cross_entropy_with_logits(x_rec, x, reduction="none").mean(dim=[-1, -2]).sum()
+
+    def get_params(self, x):
+        z = self.encoder(x, reparameterize=False)
+        return z
+
+
 class VAE(nn.Module):
     def __init__(self, in_channels: int = 3, z_dim: int = 512, msize: int = 7):
         super().__init__()
@@ -78,7 +101,7 @@ class VAE(nn.Module):
         return F.binary_cross_entropy_with_logits(x_rec, x, reduction="none").mean(dim=[-1, -2]).sum()
 
     def kl_gauss(self, mean, logvar):
-        return -0.5 * torch.sum(1 + logvar - torch.pow(mean, 2) - logvar.exp())
+        return -0.5 * torch.mean(1 + logvar - torch.pow(mean, 2) - logvar.exp(), dim=-1).sum()
 
     def get_params(self, x):
         _, z, _ = self.encoder(x, L=1)
