@@ -79,3 +79,7 @@ class VAE(nn.Module):
 
     def kl_gauss(self, mean, logvar):
         return -0.5 * torch.sum(1 + logvar - torch.pow(mean, 2) - logvar.exp())
+
+    def get_params(self, x):
+        _, z, _ = self.encoder(x, L=1)
+        return z
