@@ -57,7 +57,8 @@ df = df.reindex(columns=["unique_id", "file_path", "target", "bundle_id", "span"
 def file2img(file, target_size=(224, 224)):
     # read file and convert to gray scale
     img = Image.open(file).convert("L")
-    img = ttf.crop(img, 66, 105, 466, 566)
+    # for Zenodo
+    # img = ttf.crop(img, 66, 105, 466, 566)
     w, h = img.size
     tw, th = target_size
     if w > tw and h > th:

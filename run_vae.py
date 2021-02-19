@@ -22,6 +22,7 @@ plt.rc("legend", fontsize=10)
 
 @hydra.main(config_path="config", config_name="vae")
 def main(args):
+
     transform = tf.Compose(
         [
             tf.CenterCrop(224),
