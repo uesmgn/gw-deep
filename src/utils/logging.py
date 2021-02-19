@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 
+plt.style.use("seaborn-poster")
+plt.rcParams["lines.markersize"] = 6.0
+plt.rcParams["text.usetex"] = True
+plt.rc("legend", fontsize=10)
+
+
 def setup(ax, **kwargs):
     for k, v in kwargs.items():
         if k == "xlabel":

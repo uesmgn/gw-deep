@@ -15,11 +15,6 @@ import src.utils.transforms as transforms
 import src.utils.functional as F
 import src.utils.logging as logging
 
-plt.style.use("seaborn-poster")
-plt.rcParams["lines.markersize"] = 6.0
-plt.rcParams["text.usetex"] = True
-plt.rc("legend", fontsize=10)
-
 
 @hydra.main(config_path="config", config_name="vae")
 def main(args):
@@ -91,23 +86,27 @@ def main(args):
         losses /= num_samples
         logger.update(total_train=losses[0], bce_train=losses[1], kl_train=losses[2])
 
+        if epoch % 50 == 0:
+            torch.save(model.state_dict(), args.model_path)
+
         if epoch % 3 == 0:
             print(f"----- evaluating at epoch {epoch} -----")
             model.eval()
+            y, z = [], []
             with torch.no_grad():
                 losses = np.zeros(3)
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
                     bce, kl_gauss = model(x)
                     loss = sum([bce, kl_gauss])
-                    z, x_rec = model.params(x)
                     losses += np.array([loss.item(), bce.item(), kl_gauss.item()])
                     num_samples += len(x)
                 losses /= num_samples
                 logger.update(total_eval=losses[0], bce_eval=losses[1], kl_eval=losses[2])
 
             for key, value in logger.items():
-                logger.save(key, epoch, f"{key}_train_e{epoch}.png", xlabel="epoch", ylabel=key, xlim=(0, epoch))
+                logger.save(key, epoch, f"{key}_e{epoch}.png", xlabel="epoch", ylabel=key, xlim=(0, epoch))
+
             #         params["y"].append(target)
             #         params["z"].append(z)
             #         loss_dict_test["total"] += loss.item()
