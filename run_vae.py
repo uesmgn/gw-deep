@@ -80,7 +80,7 @@ def main(args):
         loss_dict_train = defaultdict(lambda: 0)
         for x, _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
-            bce, kl_gauss, _ = model(x)
+            bce, kl_gauss = model(x)
             loss = sum([bce, kl_gauss])
             optim.zero_grad()
             loss.backward()
@@ -105,7 +105,7 @@ def main(args):
             with torch.no_grad():
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
-                    bce, kl_gauss, z = model(x)
+                    z, x_rec = model.params(x)
                     params["y"].append(target)
                     params["z"].append(z)
                     loss_dict_test["total"] += loss.item()
