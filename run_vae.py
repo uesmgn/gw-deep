@@ -97,7 +97,7 @@ def main(args):
             print(f"{key}: {value:.3f} at epoch: {epoch}")
             stats_train[key].append(value)
 
-        if epoch % 5 == 0:
+        if epoch % 3 == 0:
             print(f"----- evaluating at epoch {epoch} -----")
             model.eval()
             loss_dict_test = defaultdict(lambda: 0)
