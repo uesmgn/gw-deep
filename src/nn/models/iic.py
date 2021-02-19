@@ -79,7 +79,14 @@ class IIC(nn.Module):
             return w
 
     def mutual_info(self, x, y, lam=1.0, eps=1e-8):
-        if x.ndim == 2:
+        if self.use_multi_heads:
+            p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
+            p = ((p + p.permute(1, 0, 2)) / 2) / p.sum()
+            p[(p < eps).data] = eps
+            _, k, m = x.shape
+            pi = p.sum(dim=1).view(k, -1).expand(k, k, m).pow(lam)
+            pj = p.sum(dim=0).view(k, -1).expand(k, k, m).pow(lam)
+        else:
             m = 1
             p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
             p = ((p + p.t()) / 2) / p.sum()
@@ -87,11 +94,4 @@ class IIC(nn.Module):
             p[(p < eps).data] = eps
             pi = p.sum(dim=1).view(k, 1).expand(k, k).pow(lam)
             pj = p.sum(dim=0).view(1, k).expand(k, k).pow(lam)
-        elif x.ndim == 3:
-            p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
-            p = ((p + p.permute(1, 0, 2)) / 2) / p.sum()
-            p[(p < eps).data] = eps
-            _, k, m = x.shape
-            pi = p.sum(dim=1).view(k, -1).expand(k, k, m).pow(lam)
-            pj = p.sum(dim=0).view(k, -1).expand(k, k, m).pow(lam)
         return (p * (torch.log(pi) + torch.log(pj) - torch.log(p))).sum() / m

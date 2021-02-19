@@ -30,9 +30,6 @@ class BaseModule(nn.Module):
                     continue
 
 
-# Conv2d: 畳み込み
-# BatchNorm2d: バッチ正規化
-# activation: 活性化関数, ReLU(), LeakyReLU(), Sigmoid(), Softmax()...
 class ECBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, stride: int = 1, activation: nn.Module = nn.ReLU(inplace=True)):
         super().__init__()
@@ -68,17 +65,6 @@ class DCBlock(nn.Module):
         return x
 
 
-# block_1: (4, 224, 224) -> (64, 112, 112)
-# pool: (64, 112, 112) -> (64, 56, 56)
-# block_2: (64, 56, 56) -> (128, 28, 28)
-# block_3: (128, 28, 28) -> (256, 14, 14)
-# block_4: (256, 14, 14) -> (512, 7, 7)
-# global_avg_pooling: (512, 7, 7) -> (512, 1, 1)
-# flatten: (512, 1, 1) -> (512, )
-# fc: (512, ) -> (1024, )
-#   mean: (512, )
-#   logvar: (512, )
-# rameterization_trick: (512, ) z = mean + std * eps (eps ~ N(0, I))
 class Encoder(nn.Module):
     def __init__(self, in_channels: int, out_dim: int):
         super().__init__()
@@ -109,12 +95,6 @@ class Encoder(nn.Module):
         return z, mean, logvar
 
 
-# fc: (512, ) -> (512 * 7 * 7, )
-# reshape: (512 * 7 * 7, ) -> (512, 7, 7)
-# block_1: (512, 7, 7) -> (256, 14, 14)
-# block_2: -
-# block_3: -
-# block_4: (64, 112, 112) -> (4, 224, 224)
 class Decoder(nn.Module):
     def __init__(self, in_dim: int, out_channels: int, msize: int = 7):
         super().__init__()

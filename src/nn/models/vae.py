@@ -16,16 +16,24 @@ class VAE(BaseModule):
         self.decoder = Decoder(z_dim, in_channels, msize)
         self.weight_init()
 
-    def forward(self, x: torch.Tensor, L: int = 1):
-        z, mean, logvar = self.encoder(x, L=L)
+    def forward(self, x: torch.Tensor):
+        z, mean, logvar = self.encoder(x)
         x_rec = self.decoder(z)
-        x_duplicated = x.repeat(L, 1, 1, 1) if L > 1 else x
-        bce = self.bce(x_rec, x_duplicated) / L
+        bce = self.bce(x_rec, x)
         kl_gauss = self.kl_gauss(mean, logvar)
-        return bce, kl_gauss, mean
+        return bce, kl_gauss
 
-    def bce(self, x_rec: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-        return F.binary_cross_entropy_with_logits(x_rec, x, reduction="none").mean(dim=[-1, -2]).sum()
+    def params(self, x: torch.Tensor):
+        z, mean, logvar = self.encoder(x)
+        x_rec = self.decoder(z)
+        return mean, x_rec
 
-    def kl_gauss(self, mean: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
-        return -0.5 * torch.mean(1 + logvar - torch.pow(mean, 2) - logvar.exp(), dim=-1).sum()
+    def bce(self, x_rec: torch.Tensor, x: torch.Tensor):
+        b, c, h, w = x.shape
+        bce = F.binary_cross_entropy_with_logits(x_rec, x, reduction="sum")
+        return bce / c / w / h
+
+    def kl_gauss(self, mean: torch.Tensor, logvar: torch.Tensor):
+        b, d = mean.shape
+        kl = -0.5 * torch.sum(1 + logvar - torch.pow(mean, 2) - logvar.exp())
+        return kl / d
