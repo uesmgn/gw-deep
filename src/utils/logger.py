@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -18,8 +19,8 @@ def setup(ax, **kwargs):
 def loss(values, epoch, out, **kwargs):
     if epoch > 1:
         fig, ax = plt.subplots()
-        epochs = np.linspace(0, epoch, len(values))
-        ax.plot(epochs, values)
+        xx = np.linspace(0, epoch, len(values))
+        ax.plot(xx, values)
         setup(ax, **kwargs)
         plt.tight_layout()
         plt.savefig(out)
