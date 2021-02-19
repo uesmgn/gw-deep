@@ -3,13 +3,9 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 
-plt.style.use("seaborn-poster")
-plt.rcParams["lines.markersize"] = 6.0
-plt.rcParams["text.usetex"] = True
-plt.rc("legend", fontsize=10)
-
-
 def setup(ax, **kwargs):
+    plt.style.use("seaborn-poster")
+    plt.rc("legend", fontsize=10)
     for k, v in kwargs.items():
         if k == "xlabel":
             ax.set_xlabel(v)

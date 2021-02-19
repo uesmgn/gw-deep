@@ -1,3 +1,5 @@
+verbose: True
+dataset_path: /home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5
 labels: [1080Lines, 1400Ripples, Air_Compressor, Blip,
          Chirp, Extremely_Loud, Helix, Koi_Fish,
          Light_Modulation, Low_Frequency_Burst, Low_Frequency_Lines, No_Glitch,
@@ -5,5 +7,9 @@ labels: [1080Lines, 1400Ripples, Air_Compressor, Blip,
          Scattered_Light, Scratchy, Tomte, Violin_Mode,
          Wandering_Line, Whistle]
 random_state: 123
+num_epoch: 1000
 batch_size: 96
+num_train_step: 100
+save_itvl: 100
+eval_itvl: 5
 model_path: /home/gen.ueshima/gen/workspace/github/vae.pt
