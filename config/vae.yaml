@@ -12,4 +12,4 @@ batch_size: 96
 num_train_step: 100
 save_itvl: 100
 eval_itvl: 5
-model_path: /home/gen.ueshima/gen/workspace/github/vae.pt
+model_dir: /home/gen.ueshima/gen/workspace/github
