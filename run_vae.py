@@ -13,6 +13,7 @@ import src.data.datasets as datasets
 import src.nn.models as models
 import src.utils.transforms as transforms
 import src.utils.functional as F
+import src.utils.logger as logger
 
 plt.style.use("seaborn-poster")
 plt.rcParams["lines.markersize"] = 6.0
@@ -123,47 +124,48 @@ def main(args):
             z = torch.cat(params["z"]).cpu().numpy()
 
             for key, value in stats_train.items():
-                xx = np.linspace(0, epoch, len(value))
-                plt.plot(xx, value)
-                plt.ylabel(key.replace("_", " "))
-                plt.xlabel("epoch")
-                plt.title(key.replace("_", " "))
-                plt.xlim(0, epoch)
-                plt.tight_layout()
-                plt.savefig(f"{key}_train_e{epoch}.png")
-                plt.close()
+                logger.loss(
+                    value,
+                    epoch,
+                    f"{key}_train_e{epoch}.png",
+                    xlabel="epoch",
+                    ylabel=key.replace("_", " "),
+                    xlim=(0, epoch),
+                    title=key.replace("_", " "),
+                )
 
-            for key, value in stats_test.items():
-                xx = np.linspace(0, epoch, len(value))
-                plt.plot(xx, value)
-                plt.ylabel(key.replace("_", " "))
-                plt.xlabel("epoch")
-                plt.title(key.replace("_", " "))
-                plt.xlim(0, epoch)
-                plt.tight_layout()
-                plt.savefig(f"{key}_test_e{epoch}.png")
-                plt.close()
+            # for key, value in stats_test.items():
+            #     xx = np.linspace(0, epoch, len(value))
+            #     plt.plot(xx, value)
+            #     plt.ylabel(key.replace("_", " "))
+            #     plt.xlabel("epoch")
+            #     plt.title(key.replace("_", " "))
+            #     plt.xlim(0, epoch)
+            #     plt.tight_layout()
+            #     plt.savefig(f"{key}_test_e{epoch}.png")
+            #     plt.close()
 
-            print("t-SNE decomposing...")
-            qz_tsne = TSNE(n_components=2, metric="cosine", random_state=random_state).fit(z).embedding_
-
-            print(f"Plotting 2D latent features with true labels...")
-            fig, ax = plt.subplots()
-            cmap = F.segmented_cmap("tab10", num_classes)
-            for i in range(num_classes):
-                idx = np.where(y == i)[0]
-                if len(idx) > 0:
-                    c = cmap(i)
-                    ax.scatter(qz_tsne[idx, 0], qz_tsne[idx, 1], color=c, label=i)
-            ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
-            ax.set_title(f"t-SNE 2D plot of latent code at epoch {epoch}")
-            ax.set_aspect(1.0 / ax.get_data_ratio())
-            plt.tight_layout()
-            plt.savefig(f"z_true_e{epoch}.png")
-            plt.close()
-
-        if epoch % 50 == 0:
-            torch.save(model.state_dict(), args.model_path)
+            #     print("t-SNE decomposing...")
+            #     qz_tsne = TSNE(n_components=2, metric="cosine", random_state=random_state).fit(z).embedding_
+            #
+            #     print(f"Plotting 2D latent features with true labels...")
+            #     fig, ax = plt.subplots()
+            #     cmap = F.segmented_cmap("tab10", num_classes)
+            #     for i in range(num_classes):
+            #         idx = np.where(y == i)[0]
+            #         if len(idx) > 0:
+            #             c = cmap(i)
+            #             ax.scatter(qz_tsne[idx, 0], qz_tsne[idx, 1], color=c, label=i)
+            #     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
+            #     ax.set_title(f"t-SNE 2D plot of latent code at epoch {epoch}")
+            #     ax.set_aspect(1.0 / ax.get_data_ratio())
+            #     plt.tight_layout()
+            #     plt.savefig(f"z_true_e{epoch}.png")
+            #     plt.close()
+            #
+            # if epoch % 50 == 0:
+            #     torch.save(model.state_dict(), args.model_path)
+            #
 
 
 if __name__ == "__main__":
