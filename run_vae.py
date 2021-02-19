@@ -106,6 +106,8 @@ def main(args):
                 losses /= num_samples
                 logger.update(total_eval=losses[0], bce_eval=losses[1], kl_eval=losses[2])
 
+            for key, value in logger.items():
+                logger.save(key, epoch, f"{key}_train_e{epoch}.png", xlabel="epoch", ylabel=key, xlim=(0, epoch))
             #         params["y"].append(target)
             #         params["z"].append(z)
             #         loss_dict_test["total"] += loss.item()
