@@ -13,7 +13,7 @@ import src.data.datasets as datasets
 import src.nn.models as models
 import src.utils.transforms as transforms
 import src.utils.functional as F
-import src.utils.logger as logger
+import src.utils.logging as logging
 
 plt.style.use("seaborn-poster")
 plt.rcParams["lines.markersize"] = 6.0
@@ -73,12 +73,12 @@ def main(args):
 
     model = models.VAE(4, 512).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=1e-4)
-    stats_train, stats_test = defaultdict(list), defaultdict(list)
+    logger = logging.LossLogger()
     for epoch in range(100):
         print(f"----- training at epoch {epoch} -----")
         model.train()
         num_samples = 0
-        loss_dict_train = defaultdict(lambda: 0)
+        losses = np.zeros(3)
         for x, _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
             bce, kl_gauss = model(x)
@@ -86,53 +86,51 @@ def main(args):
             optim.zero_grad()
             loss.backward()
             optim.step()
-            loss_dict_train["total"] += loss.item()
-            loss_dict_train["binary_cross_entropy"] += bce.item()
-            loss_dict_train["kl_divergence"] += kl_gauss.item()
+            losses += np.array([loss.item(), bce.item(), kl_gauss.item()])
             num_samples += len(x)
-
-        for key, value in loss_dict_train.items():
-            value /= num_samples
-            loss_dict_train[key] = value
-            print(f"{key}: {value:.3f} at epoch: {epoch}")
-            stats_train[key].append(value)
+        losses /= num_samples
+        logger.update(total_train=losses[0], bce_train=losses[1], kl_train=losses[2])
 
         if epoch % 3 == 0:
             print(f"----- evaluating at epoch {epoch} -----")
             model.eval()
-            loss_dict_test = defaultdict(lambda: 0)
-            params = defaultdict(list)
-
             with torch.no_grad():
+                losses = np.zeros(3)
                 for x, target in tqdm(test_loader):
                     x = x.to(device, non_blocking=True)
+                    bce, kl_gauss = model(x)
+                    loss = sum([bce, kl_gauss])
                     z, x_rec = model.params(x)
-                    params["y"].append(target)
-                    params["z"].append(z)
-                    loss_dict_test["total"] += loss.item()
-                    loss_dict_test["binary_cross_entropy"] += bce.item()
-                    loss_dict_test["kl_divergence"] += kl_gauss.item()
+                    losses += np.array([loss.item(), bce.item(), kl_gauss.item()])
                     num_samples += len(x)
+                losses /= num_samples
+                logger.update(total_eval=losses[0], bce_eval=losses[1], kl_eval=losses[2])
 
-            for key, value in loss_dict_test.items():
-                value /= num_samples
-                loss_dict_test[key] = value
-                print(f"{key}: {value:.3f} at epoch: {epoch}")
-                stats_test[key].append(value)
+            #         params["y"].append(target)
+            #         params["z"].append(z)
+            #         loss_dict_test["total"] += loss.item()
+            #         loss_dict_test["binary_cross_entropy"] += bce.item()
+            #         loss_dict_test["kl_divergence"] += kl_gauss.item()
+            #
+            # for key, value in loss_dict_test.items():
+            #     value /= num_samples
+            #     loss_dict_test[key] = value
+            #     print(f"{key}: {value:.3f} at epoch: {epoch}")
+            #     stats_test[key].append(value)
+            #
+            # y = torch.cat(params["y"]).int().numpy()
+            # z = torch.cat(params["z"]).cpu().numpy()
 
-            y = torch.cat(params["y"]).int().numpy()
-            z = torch.cat(params["z"]).cpu().numpy()
-
-            for key, value in stats_train.items():
-                logger.loss(
-                    value,
-                    epoch,
-                    f"{key}_train_e{epoch}.png",
-                    xlabel="epoch",
-                    ylabel=key.replace("_", " "),
-                    xlim=(0, epoch),
-                    title=key.replace("_", " "),
-                )
+            # for key, value in stats_train.items():
+            #     logging.loss(
+            #         value,
+            #         epoch,
+            #         f"{key}_train_e{epoch}.png",
+            #         xlabel="epoch",
+            #         ylabel=key.replace("_", " "),
+            #         xlim=(0, epoch),
+            #         title=key.replace("_", " "),
+            #     )
 
             # for key, value in stats_test.items():
             #     xx = np.linspace(0, epoch, len(value))

@@ -2,6 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+class LossLogger:
+    def __init__(self):
+        self.stats = {}
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if key not in self.stats:
+                self.stats[key] = defaultdict(list)
+            self.stats[key].append(value)
+
+
 def setup(ax, **kwargs):
     for k, v in kwargs.items():
         if k == "xlabel":
