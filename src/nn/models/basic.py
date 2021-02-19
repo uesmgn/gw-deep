@@ -10,7 +10,7 @@ __all__ = ["BaseModule", "ECBlock", "DCBlock", "Encoder", "Decoder"]
 
 class BaseModule(nn.Module):
     def __init__(self):
-        pass
+        super().__init__()
 
     def load_state_dict_part(self, state_dict):
         own_state = self.state_dict()
