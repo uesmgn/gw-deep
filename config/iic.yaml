@@ -1,0 +1,11 @@
+dataset_path: /home/gen.ueshima/gen/workspace/github/GravitySpy/processed/dataset_small.h5
+labels: [1080Lines, 1400Ripples, Air_Compressor, Blip,
+         Chirp, Extremely_Loud, Helix, Koi_Fish,
+         Light_Modulation, Low_Frequency_Burst, Low_Frequency_Lines, No_Glitch,
+         None_of_the_Above, Paired_Doves, Power_Line, Repeating_Blips,
+         Scattered_Light, Scratchy, Tomte, Violin_Mode,
+         Wandering_Line, Whistle]
+random_state: 123
+batch_size: 96
+model_path: /home/gen.ueshima/gen/workspace/github/vae+.pt
+lam: 1.5

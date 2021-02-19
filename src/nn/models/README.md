@@ -1,6 +1,5 @@
 # Versions
-Pytorch 3.7
-CUDA-toolkit 10.2
+
 
 # References
 [pytorch.org](https://pytorch.org/)
