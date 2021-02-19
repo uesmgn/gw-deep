@@ -85,7 +85,9 @@ def main(args):
         logger.update(total_train=losses[0], bce_train=losses[1], kl_train=losses[2])
 
         if epoch % args.save_itvl == 0:
-            torch.save(model.state_dict(), args.model_path)
+            file = f"vae_e{epoch}.pt"
+            torch.save(model.state_dict(), os.path.join(args.model_dir, file))
+            print(f"Model parameters are saved to {file}.")
 
         if epoch % args.eval_itvl == 0:
             print(f"evaluating at epoch {epoch}...")
