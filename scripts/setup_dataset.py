@@ -9,12 +9,11 @@ from hashids import Hashids
 from PIL import Image
 import torchvision.transforms.functional as ttf
 import numpy as np
-import src.utils.validation as validation
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("dataset_root", type=validation.is_dir, help="path to dataset folder.")
-parser.add_argument("path_to_hdf", type=validation.new_hdf, help="path to hdf file to create or overwrite.")
+parser.add_argument("dataset_root", type=str, help="path to dataset folder.")
+parser.add_argument("path_to_hdf", type=str, help="path to hdf file to create or overwrite.")
 args = parser.parse_args()
 
 dataset_root = args.dataset_root
