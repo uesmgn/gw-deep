@@ -5,7 +5,29 @@ import math
 from collections import abc
 
 
-__all__ = ["ECBlock", "DCBlock", "Encoder", "Decoder"]
+__all__ = ["BaseModule", "ECBlock", "DCBlock", "Encoder", "Decoder"]
+
+
+class BaseModule(nn.Module):
+    def __init__(self):
+        pass
+
+    def load_state_dict_part(self, state_dict):
+        own_state = self.state_dict()
+        for name, param in state_dict.items():
+            if name not in own_state:
+                continue
+            print(f"load state dict: {name}")
+            own_state[name].copy_(param)
+
+    def weight_init(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.xavier_normal_(m.weight)
+                try:
+                    nn.init.zeros_(m.bias)
+                except:
+                    continue
 
 
 # Conv2d: 畳み込み
