@@ -10,7 +10,7 @@ random_state: 123
 in_channels: 4
 train_size: 0.8
 z_dim: 512
-lr: 1e-4
+lr: 5e-4
 num_epoch: 1000
 batch_size: 96
 num_train_step: 100
@@ -22,4 +22,4 @@ gpu:
   train: 0
   eval: 1
 
-trained_model_file: vae_e50.pt
+trained_model_file: vae_e100.pt
