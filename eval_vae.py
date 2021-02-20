@@ -80,7 +80,7 @@ def main(args):
     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     ax.set_aspect(1.0 / ax.get_data_ratio())
     plt.tight_layout()
-    plt.savefig(f"z_tsne_e{epoch}.png")
+    plt.savefig(f"z_tsne_e{args.eval_epoch}.png")
     plt.close()
 
 
