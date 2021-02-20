@@ -26,7 +26,6 @@ gpu:
   train: 0
   eval: 1
 
-trained_model_file: iic_e100.pt
 pretrained: True
 pretrained_model_file: vae_e0.pt
 

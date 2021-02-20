@@ -40,23 +40,15 @@ def main(args):
     target_transform = transforms.ToIndex(args.labels)
 
     dataset = datasets.HDF5(args.dataset_path, transform=transform, target_transform=target_transform)
-    train_set, test_set = dataset.split(train_size=args.train_size, random_state=args.random_state, stratify=dataset.targets)
-    train_set = train_set.co(augment)
+    dataset = dataset.co(augment)
 
     train_loader = torch.utils.data.DataLoader(
-        train_set,
+        dataset,
         batch_size=args.batch_size,
         num_workers=os.cpu_count(),
-        sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples=args.batch_size * args.num_train_step),
+        sampler=torch.utils.data.RandomSampler(dataset, replacement=True, num_samples=args.batch_size * args.num_train_step),
         pin_memory=True,
         drop_last=True,
-    )
-    test_loader = torch.utils.data.DataLoader(
-        test_set,
-        batch_size=args.batch_size,
-        num_workers=os.cpu_count(),
-        pin_memory=True,
-        drop_last=False,
     )
 
     if torch.cuda.is_available():
@@ -102,7 +94,6 @@ def main(args):
             print(f"Model parameters are saved to {model_file}.")
 
         if epoch % args.eval_itvl == 0:
-
             for key, value in logger.items():
                 logger.save(key, epoch, f"{key}_e{epoch}.png", xlabel="epoch", ylabel=key, xlim=(0, epoch))
 
