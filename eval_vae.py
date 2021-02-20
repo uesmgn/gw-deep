@@ -76,7 +76,7 @@ def main(args):
         idx = np.where(y == i)[0]
         if len(idx) > 0:
             c = cmap(i)
-            ax.scatter(z_tsne[idx, 0], z_tsne[idx, 1], color=c, label=args.labels[i], edgecolors=darken(c))
+            ax.scatter(z_tsne[idx, 0], z_tsne[idx, 1], color=c, label=args.labels[i], edgecolors=F.darken(c))
     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     ax.set_aspect(1.0 / ax.get_data_ratio())
     plt.tight_layout()

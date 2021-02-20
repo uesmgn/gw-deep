@@ -2,6 +2,7 @@ import torch
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import colorsys
 
 
 def get_mean_std(loader):
@@ -22,3 +23,8 @@ def segmented_cmap(cmap, num_split=10):
     tmp = [mapper.to_rgba(i) for i in range(cmap.N)]
     cmap = colors.LinearSegmentedColormap.from_list("custom_cmap", tmp, N=num_split)
     return cmap
+
+
+def darken(c, amount=0.5):
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
