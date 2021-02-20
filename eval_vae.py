@@ -55,11 +55,11 @@ def main(args):
         device = torch.device("cpu")
 
     model = models.VAE(args.in_channels, args.z_dim).to(device)
-    model_file = f"vae_e{args.eval_epoch}.pt"
+    model_file = os.path.join(args.model_dir, args.trained_model_file)
     try:
-        model.load_state_dict_part(torch.load(os.path.join(args.model_dir, model_file)))
+        model.load_state_dict_part(torch.load(model_file))
     except:
-        raise FileNotFoundError(f"Model file does not exist: {os.path.join(args.model_dir, model_file)}")
+        raise FileNotFoundError(f"Model file does not exist: {model_file}")
 
     z, y = [], []
     model.eval()
