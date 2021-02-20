@@ -55,11 +55,31 @@ def main(args):
     except:
         raise FileNotFoundError(f"Model file does not exist: {os.path.join(args.model_dir, model_file)}")
 
+    z, y = [], []
     model.eval()
     with torch.no_grad():
         for x, target in tqdm(test_loader):
             x = x.to(device, non_blocking=True)
-            z, x_recon = model.get_params(x)
+            z_mb, _ = model.params(x)
+            z.append(z_mb)
+            y.append(target)
+    z = torch.cat(z).cpu().numpy()
+    y = torch.cat(y).cpu().numpy().astype(int)
+
+    print(f"Plotting 2D latent features with true labels...")
+    z_tsne = TSNE(n_components=2, random_state=args.random_state).fit(z).embedding_
+    fig, ax = plt.subplots()
+    cmap = F.segmented_cmap(args.num_classes, "tab10")
+    for i in range(args.num_classes):
+        idx = np.where(y == i)[0]
+        if len(idx) > 0:
+            c = cmap(i)
+            ax.scatter(z_tsne[idx, 0], z_tsne[idx, 1], color=c, label=args.labels[i], edgecolors=darken(c))
+    ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
+    ax.set_aspect(1.0 / ax.get_data_ratio())
+    plt.tight_layout()
+    plt.savefig(f"z_tsne_e{epoch}.png")
+    plt.close()
 
 
 if __name__ == "__main__":

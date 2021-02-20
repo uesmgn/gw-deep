@@ -22,4 +22,4 @@ gpu:
   train: 0
   eval: 1
 
-eval_epoch: 50
+eval_epoch: 0
