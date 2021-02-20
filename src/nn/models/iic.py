@@ -9,7 +9,7 @@ from .basic import *
 __all__ = ["IIC"]
 
 
-class IIC(nn.Module):
+class IIC(BaseModule):
     def __init__(self, in_channels: int = 3, num_classes: int = 10, num_classes_over: int = 100, z_dim=512, num_heads=10):
         super().__init__()
         self.use_multi_heads = num_heads > 1
@@ -25,6 +25,8 @@ class IIC(nn.Module):
             self.over_classifier = nn.ModuleList([self.gen_classifier(z_dim, num_classes_over) for _ in range(self.num_heads)])
         else:
             self.over_classifier = self.gen_classifier(z_dim, num_classes_over)
+
+        self.weight_init()
 
     def gen_classifier(self, in_dim, out_dim):
         return nn.Sequential(
