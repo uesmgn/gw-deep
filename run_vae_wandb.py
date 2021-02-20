@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as tf
 from collections import defaultdict
 
-from sklearn.manifold import TSNE
-
 import src.data.datasets as datasets
 import src.nn.models as models
 import src.utils.transforms as transforms
