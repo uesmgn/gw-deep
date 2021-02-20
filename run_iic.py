@@ -17,7 +17,7 @@ plt.rcParams["lines.markersize"] = 6.0
 plt.rc("legend", fontsize=10)
 
 
-@hydra.main(config_path="config", config_name="vae")
+@hydra.main(config_path="config", config_name="iic")
 def main(args):
     if args.verbose:
         from tqdm import tqdm
