@@ -29,6 +29,8 @@ def main(args):
     )
     target_transform = transforms.ToIndex(args.labels)
 
+    num_classes = len(args.labels)
+
     dataset = datasets.HDF5(args.dataset_path, transform=transform, target_transform=target_transform)
     train_set, test_set = dataset.split(train_size=args.train_size, random_state=args.random_state, stratify=dataset.targets)
 
@@ -69,8 +71,8 @@ def main(args):
     print(f"Plotting 2D latent features with true labels...")
     z_tsne = TSNE(n_components=2, random_state=args.random_state).fit(z).embedding_
     fig, ax = plt.subplots()
-    cmap = F.segmented_cmap(args.num_classes, "tab10")
-    for i in range(args.num_classes):
+    cmap = F.segmented_cmap("tab10", num_classes)
+    for i in range(num_classes):
         idx = np.where(y == i)[0]
         if len(idx) > 0:
             c = cmap(i)
