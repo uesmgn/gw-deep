@@ -68,7 +68,7 @@ def main(args):
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     logger = logging.LossLogger()
     for epoch in range(args.num_epoch):
-        (f"training at epoch {epoch}...")
+        print(f"training at epoch {epoch}...")
         model.train()
         num_samples = 0
         losses = np.zeros(3)
