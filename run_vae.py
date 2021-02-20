@@ -38,7 +38,7 @@ def main(args):
     target_transform = transforms.ToIndex(args.labels)
 
     dataset = datasets.HDF5(args.dataset_path, transform=transform, target_transform=target_transform)
-    train_set, test_set = dataset.split(train_size=0.8, random_state=args.random_state, stratify=dataset.targets)
+    train_set, test_set = dataset.split(train_size=args.train_size, random_state=args.random_state, stratify=dataset.targets)
     train_set.transform = augment
 
     train_loader = torch.utils.data.DataLoader(
@@ -59,6 +59,7 @@ def main(args):
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
+        torch.cuda.set_device(args.gpu.train)
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.deterministic = True
     else:
@@ -85,9 +86,9 @@ def main(args):
         logger.update(total_train=losses[0], bce_train=losses[1], kl_train=losses[2])
 
         if epoch % args.save_itvl == 0:
-            file = f"vae_e{epoch}.pt"
-            torch.save(model.state_dict(), os.path.join(args.model_dir, file))
-            print(f"Model parameters are saved to {file}.")
+            model_file = f"vae_e{epoch}.pt"
+            torch.save(model.state_dict(), os.path.join(args.model_dir, model_file))
+            print(f"Model parameters are saved to {model_file}.")
 
         if epoch % args.eval_itvl == 0:
             print(f"evaluating at epoch {epoch}...")

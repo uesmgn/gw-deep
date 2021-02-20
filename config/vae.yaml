@@ -8,11 +8,18 @@ labels: [1080Lines, 1400Ripples, Air_Compressor, Blip,
          Wandering_Line, Whistle]
 random_state: 123
 in_channels: 4
+train_size: 0.8
 z_dim: 512
 lr: 1e-4
 num_epoch: 1000
 batch_size: 96
 num_train_step: 100
-save_itvl: 100
+save_itvl: 50
 eval_itvl: 5
 model_dir: /home/gen.ueshima/gen/workspace/github
+
+gpu:
+  train: 0
+  eval: 1
+
+eval_epoch: 50
