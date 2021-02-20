@@ -58,7 +58,7 @@ def file2img(file, target_size=(224, 224)):
     # read file and convert to gray scale
     img = Image.open(file).convert("L")
     # for Zenodo
-    # img = ttf.crop(img, 66, 105, 466, 566)
+    img = ttf.crop(img, 66, 105, 466, 566)
     w, h = img.size
     tw, th = target_size
     if w > tw and h > th:
