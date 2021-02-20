@@ -31,9 +31,9 @@ class LossLogger:
         return self.stats.items()
 
     def save(self, key, epoch, out, **kwargs):
-        if epoch > 1:
+        yy = self.stats[key]
+        if len(yy) > 1:
             fig, ax = plt.subplots()
-            yy = self.stats[key]
             xx = np.linspace(0, epoch, len(yy))
             ax.plot(xx, yy)
             setup(ax, **kwargs)
