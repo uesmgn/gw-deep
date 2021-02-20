@@ -64,8 +64,8 @@ def main(args):
     else:
         device = torch.device("cpu")
 
-    model = models.VAE(4, 512).to(device)
-    optim = torch.optim.Adam(model.parameters(), lr=1e-4)
+    model = models.VAE(args.in_channels, args.z_dim).to(device)
+    optim = torch.optim.Adam(model.parameters(), lr=args.lr)
     logger = logging.LossLogger()
     for epoch in range(args.num_epoch):
         (f"training at epoch {epoch}...")
@@ -92,7 +92,7 @@ def main(args):
         if epoch % args.eval_itvl == 0:
             print(f"evaluating at epoch {epoch}...")
             model.eval()
-            y, z = [], []
+            num_samples = 0
             with torch.no_grad():
                 losses = np.zeros(3)
                 for x, target in tqdm(test_loader):
