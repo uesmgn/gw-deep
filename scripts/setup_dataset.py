@@ -5,7 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 import re
 import h5py
-from hashids import Hashids
+import uuid
 from PIL import Image
 import torchvision.transforms.functional as ttf
 import numpy as np
@@ -32,7 +32,7 @@ for target in tqdm(targets):
     df = pd.DataFrame(files, columns=["file"])
     df = df.assign(bundle=df.file.apply(lambda x: re.sub(r"([H,L]1)_([a-zA-Z0-9]{10})_.*.png", r"\1_\2", os.path.basename(x))))
     for bundle, bf in df.groupby("bundle"):
-        bundle_id = Hashids(min_length=6).encode(idx)
+        bundle_id = str(uuid.uuid4())[-6:]
         idx += 1
         for file in bf.file:
             span = re.sub(r".*([0-9]\.[0-9]).png", r"\1", os.path.basename(file)).replace(".", "")

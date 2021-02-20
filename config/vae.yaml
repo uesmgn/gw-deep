@@ -23,3 +23,8 @@ gpu:
   eval: 1
 
 trained_model_file: vae_e100.pt
+
+wandb:
+  project: gw-deep
+  group: vae
+  name: vae

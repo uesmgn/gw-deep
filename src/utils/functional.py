@@ -3,6 +3,7 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import colorsys
+from collections import abc
 
 
 def get_mean_std(loader):
@@ -28,3 +29,14 @@ def segmented_cmap(cmap, num_split=10):
 def darken(c, amount=0.5):
     c = colorsys.rgb_to_hls(*colors.to_rgb(c))
     return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
+
+
+def flatten(d, parent_key="", sep="."):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, abc.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
