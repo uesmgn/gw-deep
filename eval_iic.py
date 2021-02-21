@@ -124,34 +124,34 @@ def main(args):
         plt.savefig(f"cm_over_{i}.png", dpi=300)
         plt.close()
 
-        sil = silhouette_samples(z, y)
-        cmap = F.segmented_cmap("tab10", len(args.labels))
-        fig, ax = plt.subplots()
-        y_lower, y_upper = 0, 0
-        yticks, sil_means, sil_pos = [], [], []
-        for i in np.unique(y)[::-1]:
-            sil_i = sorted(sil[y == i])
-            y_upper = y_lower + len(sil_i)
-            c = cmap(i)
-            plt.barh(
-                range(y_lower, y_upper),
-                sil_i,
-                height=1.0,
-                color=c,
-                edgecolor="none",
-                zorder=1,
-            )
-            pos = (y_lower + y_upper) / 2
-            sil_pos.append(pos)
-            y_lower = y_upper + 50  # 10 for the 0 samples
-        ax.set_xlabel("silhouette coefficients")
-        ax.set_ylabel("labels")
-        ax.set_ylim([0, y_upper])
-        ax.set_aspect("equal")
-        plt.yticks(sil_pos, args.labels[::-1], rotation=45)
-        plt.tight_layout()
-        plt.savefig(f"silhouette_true.png", dpi=300)
-        plt.close()
+    sil = silhouette_samples(z, y)
+    cmap = F.segmented_cmap("tab10", len(args.labels))
+    fig, ax = plt.subplots()
+    y_lower, y_upper = 0, 0
+    yticks, sil_means, sil_pos = [], [], []
+    for i in np.unique(y)[::-1]:
+        sil_i = sorted(sil[y == i])
+        y_upper = y_lower + len(sil_i)
+        c = cmap(i)
+        plt.barh(
+            range(y_lower, y_upper),
+            sil_i,
+            height=1.0,
+            color=c,
+            edgecolor="none",
+            zorder=1,
+        )
+        pos = (y_lower + y_upper) / 2
+        sil_pos.append(pos)
+        y_lower = y_upper + 50  # 10 for the 0 samples
+    ax.set_xlabel("silhouette coefficients")
+    ax.set_ylabel("labels")
+    ax.set_ylim([0, y_upper])
+    ax.set_aspect("equal")
+    plt.yticks(sil_pos, args.labels[::-1], rotation=45)
+    plt.tight_layout()
+    plt.savefig(f"silhouette_true.png", dpi=300)
+    plt.close()
 
 
 if __name__ == "__main__":
