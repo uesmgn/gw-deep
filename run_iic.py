@@ -78,7 +78,7 @@ def main(args):
         losses = np.zeros(3)
         for (x, x_), _ in tqdm(train_loader):
             x, x_ = x.to(device, non_blocking=True), x_.to(device, non_blocking=True)
-            mi, mi_over = model(x, x_, lam=args.lam)
+            mi, mi_over = model(x, x_, lam=args.lam, z_detach=args.z_detach)
             loss = sum([mi, mi_over])
             optim.zero_grad()
             loss.backward()
