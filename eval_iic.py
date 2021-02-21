@@ -81,7 +81,6 @@ def main(args):
             y.append(target)
     py = torch.cat(py).argmax(1).cpu().numpy().astype(int)  # shape: (N, num_heads), values: [0, num_classes-1]
     pw = torch.cat(pw).argmax(1).cpu().numpy().astype(int)  # shape: (N, num_heads), values: [0, num_classes_over-1]
-    print(py.shape, pw.shape)
     z = torch.cat(z).cpu().numpy()
     y = torch.cat(y).cpu().numpy().astype(int)
 
@@ -97,7 +96,6 @@ def main(args):
             linewidths=0.1,
             linecolor="gray",
             cmap="afmhot_r",
-            square=True,
             cbar=True,
             cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
         )
@@ -115,7 +113,6 @@ def main(args):
             linewidths=0.1,
             linecolor="gray",
             cmap="afmhot_r",
-            square=True,
             cbar=True,
             cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
         )
