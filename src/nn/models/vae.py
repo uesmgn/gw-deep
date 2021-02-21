@@ -30,11 +30,9 @@ class VAE(BaseModule):
         return mean, x_rec
 
     def bce(self, x_rec: torch.Tensor, x: torch.Tensor):
-        b, c, h, w = x.shape
-        bce = F.binary_cross_entropy_with_logits(x_rec, x, reduction="sum")
-        return bce / c / w / h
+        bce = F.binary_cross_entropy_with_logits(x_rec, x, reduction="mean")
+        return bce
 
     def kl_gauss(self, mean: torch.Tensor, logvar: torch.Tensor):
-        b, d = mean.shape
         kl = -0.5 * torch.sum(1 + logvar - torch.pow(mean, 2) - logvar.exp())
-        return kl / d
+        return kl
