@@ -87,14 +87,13 @@ def main(args):
 
     for i in range(args.num_heads):
         py_i, pw_i = py[:, i], pw[:, i]
-        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)))[: args.num_classes, :]
-        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)))[: args.num_classes, :]
+        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="true")[: args.num_classes, :]
+        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="true")[: args.num_classes, :]
 
         fig, ax = plt.subplots()
         seaborn.heatmap(
-            normalize(cm_y, axis=0),
+            cm_y,
             ax=ax,
-            annot=cm_y,
             linewidths=0.1,
             linecolor="gray",
             cmap="afmhot_r",
@@ -105,14 +104,13 @@ def main(args):
         plt.xlabel("new labels")
         plt.ylabel("true labels")
         plt.tight_layout()
-        plt.savefig(f"cm_{i}.png")
+        plt.savefig(f"cm_{i}.png", dpi=300)
         plt.close()
 
         fig, ax = plt.subplots()
         seaborn.heatmap(
-            normalize(cm_w, axis=0),
+            cm_w,
             ax=ax,
-            annot=cm_w,
             linewidths=0.1,
             linecolor="gray",
             cmap="afmhot_r",
@@ -122,7 +120,7 @@ def main(args):
         plt.xlabel("new labels (overclustering)")
         plt.ylabel("true labels")
         plt.tight_layout()
-        plt.savefig(f"cm_over_{i}.png")
+        plt.savefig(f"cm_over_{i}.png", dpi=300)
         plt.close()
 
     # print(f"Plotting 2D latent features with true labels...")
