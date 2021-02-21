@@ -126,28 +126,21 @@ def main(args):
 
     sil = silhouette_samples(z, y)
     cmap = F.segmented_cmap("tab10", len(args.labels))
-    fig, ax = plt.subplots(figsize=[12, 24])
+    fig, ax = plt.subplots(figsize=[12, 12])
     y_lower, y_upper = 0, 0
     yticks, sil_means, sil_pos = [], [], []
     for i in np.unique(y)[::-1]:
         sil_i = sorted(sil[y == i])
         y_upper = y_lower + len(sil_i)
         c = cmap(i)
-        plt.barh(
-            range(y_lower, y_upper),
-            sil_i,
-            height=1.0,
-            color=c,
-            edgecolor="none",
-            zorder=1,
-        )
+        plt.barh(range(y_lower, y_upper), sil_i, height=1.0, color=c, edgecolor="none", zorder=1, label=args.labels[i])
         pos = (y_lower + y_upper) / 2
         sil_pos.append(pos)
         y_lower = y_upper + 50
     ax.set_xlabel("silhouette coefficients")
     ax.set_ylabel("labels")
     ax.set_ylim([0, y_upper])
-    plt.yticks(sil_pos, args.labels[::-1], rotation=45)
+    ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     plt.tight_layout()
     plt.savefig(f"silhouette_true.png", dpi=300)
     plt.close()
