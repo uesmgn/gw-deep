@@ -131,7 +131,7 @@ def main(args):
     fig, ax = plt.subplots(figsize=[12, 12])
     y_lower, y_upper = 0, 0
     yticks, sil_means, sil_pos = [], [], []
-    for i in np.unique(y)[::-1]:
+    for i in np.unique(y):
         sil_i = sorted(sil[y == i])
         y_upper = y_lower + len(sil_i)
         c = cmap(i)
@@ -141,7 +141,7 @@ def main(args):
         y_lower = y_upper + 50
     ax.set_xlabel("silhouette coefficients")
     ax.set_ylabel("labels")
-    ax.set_ylim([0, y_upper])
+    ax.set_ylim([y_upper, 0])
     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     plt.tight_layout()
     plt.savefig(f"silhouette_true.png", dpi=300)
