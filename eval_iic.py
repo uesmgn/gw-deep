@@ -126,7 +126,7 @@ def main(args):
 
     sil = silhouette_samples(z, y)
     cmap = F.segmented_cmap("tab10", len(args.labels))
-    fig, ax = plt.subplots(figsize=[12, 18])
+    fig, ax = plt.subplots(figsize=[12, 24])
     y_lower, y_upper = 0, 0
     yticks, sil_means, sil_pos = [], [], []
     for i in np.unique(y)[::-1]:
