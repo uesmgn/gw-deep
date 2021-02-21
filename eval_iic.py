@@ -143,7 +143,7 @@ def main(args):
             )
             pos = (y_lower + y_upper) / 2
             sil_pos.append(pos)
-            sil_colors.append(darken(c))
+            sil_colors.append(F.darken(c))
             y_lower = y_upper + 50  # 10 for the 0 samples
         ax.set_xlabel("silhouette coefficients")
         ax.set_ylabel("labels")
