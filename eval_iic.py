@@ -26,7 +26,7 @@ plt.rc("legend", fontsize=10)
 @hydra.main(config_path="config", config_name="iic")
 def main(args):
 
-    labels = np.array(args.labels)
+    labels = list(args.labels)
 
     transform = tf.Compose(
         [
