@@ -47,7 +47,7 @@ def main(args):
     train_loader = torch.utils.data.DataLoader(
         dataset,
         batch_size=args.batch_size,
-        num_workers=os.cpu_count(),
+        num_workers=os.cpu_count() // 2,
         sampler=torch.utils.data.RandomSampler(dataset, replacement=True, num_samples=args.batch_size * args.num_train_step),
         pin_memory=True,
         drop_last=True,
