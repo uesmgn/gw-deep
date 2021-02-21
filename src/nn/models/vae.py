@@ -17,10 +17,11 @@ class VAE(BaseModule):
         self.weight_init()
 
     def forward(self, x: torch.Tensor):
+        b = len(x)
         z, mean, logvar = self.encoder(x)
         x_rec = self.decoder(z)
-        bce = self.bce(x_rec, x)
-        kl_gauss = self.kl_gauss(mean, logvar)
+        bce = self.bce(x_rec, x) / b
+        kl_gauss = self.kl_gauss(mean, logvar) / b
         return bce, kl_gauss
 
     def params(self, x: torch.Tensor):
@@ -30,7 +31,8 @@ class VAE(BaseModule):
         return mean, x_rec
 
     def bce(self, x_rec: torch.Tensor, x: torch.Tensor):
-        bce = F.binary_cross_entropy_with_logits(x_rec, x, reduction="mean")
+        b, c, w, h = x.shape
+        bce = F.binary_cross_entropy_with_logits(x_rec, x, reduction="sum")
         return bce
 
     def kl_gauss(self, mean: torch.Tensor, logvar: torch.Tensor):
