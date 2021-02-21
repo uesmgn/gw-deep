@@ -26,6 +26,8 @@ plt.rc("legend", fontsize=10)
 @hydra.main(config_path="config", config_name="iic")
 def main(args):
 
+    labels = np.array(args.labels)
+
     transform = tf.Compose(
         [
             tf.CenterCrop(224),
@@ -38,9 +40,9 @@ def main(args):
             tf.CenterCrop(224),
         ]
     )
-    target_transform = transforms.ToIndex(args.labels)
+    target_transform = transforms.ToIndex(labels)
 
-    num_classes = len(args.labels)
+    num_classes = len(labels)
 
     dataset = datasets.HDF5(args.dataset_path, transform=transform, target_transform=target_transform)
 
@@ -86,8 +88,8 @@ def main(args):
 
     for i in range(args.num_heads):
         py_i, pw_i = py[:, i], pw[:, i]
-        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="pred")[: len(args.labels), :]
-        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="pred")[: len(args.labels), :]
+        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="pred")[: len(labels), :]
+        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="pred")[: len(labels), :]
 
         fig, ax = plt.subplots(figsize=[12, 6])
         seaborn.heatmap(
@@ -125,7 +127,7 @@ def main(args):
         plt.close()
 
     sil = silhouette_samples(z, y)
-    cmap = F.segmented_cmap("tab10", len(args.labels))
+    cmap = F.segmented_cmap("tab10", len(labels))
     fig, ax = plt.subplots(figsize=[12, 12])
     y_lower, y_upper = 0, 0
     yticks, sil_means, sil_pos = [], [], []
@@ -133,7 +135,7 @@ def main(args):
         sil_i = sorted(sil[y == i])
         y_upper = y_lower + len(sil_i)
         c = cmap(i)
-        plt.barh(range(y_lower, y_upper), sil_i, height=1.0, color=c, edgecolor="none", zorder=1, label=args.labels[i])
+        plt.barh(range(y_lower, y_upper), sil_i, height=1.0, color=c, edgecolor="none", zorder=1, label=labels[i])
         pos = (y_lower + y_upper) / 2
         sil_pos.append(pos)
         y_lower = y_upper + 50
