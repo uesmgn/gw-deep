@@ -75,7 +75,6 @@ def main(args):
 
     model = models.VAE(args.in_channels, args.z_dim).to(device)
     optim = torch.optim.Adam(model.parameters(), lr=args.lr)
-    logger = logging.LossLogger()
     for epoch in range(args.num_epoch):
         print(f"training at epoch {epoch}...")
         model.train()
@@ -84,7 +83,7 @@ def main(args):
         for x, _ in tqdm(train_loader):
             x = x.to(device, non_blocking=True)
             bce, kl_gauss = model(x)
-            loss = sum([bce, kl_gauss])
+            loss = sum([bce, args.beta * kl_gauss])
             optim.zero_grad()
             loss.backward()
             optim.step()
