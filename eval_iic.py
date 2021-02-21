@@ -147,7 +147,6 @@ def main(args):
     ax.set_xlabel("silhouette coefficients")
     ax.set_ylabel("labels")
     ax.set_ylim([0, y_upper])
-    ax.set_aspect("equal")
     plt.yticks(sil_pos, args.labels[::-1], rotation=45)
     plt.tight_layout()
     plt.savefig(f"silhouette_true.png", dpi=300)
