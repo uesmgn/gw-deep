@@ -128,7 +128,7 @@ def main(args):
         cmap = F.segmented_cmap("tab10", len(args.labels))
         fig, ax = plt.subplots()
         y_lower, y_upper = 0, 0
-        yticks, sil_means, sil_pos, sil_colors = [], [], [], []
+        yticks, sil_means, sil_pos = [], [], []
         for i in np.unique(y)[::-1]:
             sil_i = sorted(sil[y == i])
             y_upper = y_lower + len(sil_i)
@@ -143,14 +143,14 @@ def main(args):
             )
             pos = (y_lower + y_upper) / 2
             sil_pos.append(pos)
-            sil_colors.append(F.darken(c))
             y_lower = y_upper + 50  # 10 for the 0 samples
         ax.set_xlabel("silhouette coefficients")
         ax.set_ylabel("labels")
         ax.set_ylim([0, y_upper])
+        ax.set_aspect("equal")
         plt.yticks(sil_pos, args.labels[::-1], rotation=45)
         plt.tight_layout()
-        plt.savefig(f"silhouette_true.png")
+        plt.savefig(f"silhouette_true.png", dpi=300)
         plt.close()
 
 
