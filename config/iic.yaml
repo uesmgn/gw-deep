@@ -9,7 +9,7 @@ labels: [1080Lines, 1400Ripples, Air_Compressor, Blip,
 random_state: 123
 in_channels: 4
 train_size: 0.8
-z_dim: 512
+z_dim: 64
 num_classes: 50
 num_classes_over: 250
 num_heads: 5
