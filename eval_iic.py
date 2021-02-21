@@ -132,7 +132,7 @@ def main(args):
     y_lower, y_upper = 0, 0
     yticks, sil_means, sil_pos = [], [], []
     for i in np.unique(y):
-        sil_i = sorted(sil[y == i])
+        sil_i = sorted(sil[y == i])[::-1]
         y_upper = y_lower + len(sil_i)
         c = cmap(i)
         plt.barh(range(y_lower, y_upper), sil_i, height=1.0, color=c, edgecolor="none", zorder=1, label=labels[i])
