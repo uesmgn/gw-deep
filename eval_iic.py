@@ -117,26 +117,13 @@ def main(args):
             cbar=True,
             cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
         )
+        plt.xticks(rotation=45)
+        plt.yticks(rotation=45)
         plt.xlabel("new labels (overclustering)")
         plt.ylabel("true labels")
         plt.tight_layout()
         plt.savefig(f"cm_over_{i}.png", dpi=300)
         plt.close()
-
-    # print(f"Plotting 2D latent features with true labels...")
-    # z_tsne = TSNE(n_components=2, random_state=args.random_state).fit(z).embedding_
-    # fig, ax = plt.subplots()
-    # cmap = F.segmented_cmap("tab10", num_classes)
-    # for i in range(num_classes):
-    #     idx = np.where(y == i)[0]
-    #     if len(idx) > 0:
-    #         c = cmap(i)
-    #         ax.scatter(z_tsne[idx, 0], z_tsne[idx, 1], color=c, label=args.labels[i], edgecolors=F.darken(c))
-    # ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
-    # ax.set_aspect(1.0 / ax.get_data_ratio())
-    # plt.tight_layout()
-    # plt.savefig(f"z_tsne_true.png")
-    # plt.close()
 
 
 if __name__ == "__main__":
