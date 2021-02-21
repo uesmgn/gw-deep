@@ -100,6 +100,7 @@ def main(args):
             cbar=True,
             cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
         )
+        ax.set_aspect("auto")
         plt.yticks(rotation=45)
         plt.xlabel("new labels")
         plt.ylabel("true labels")
@@ -117,6 +118,7 @@ def main(args):
             cbar=True,
             cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
         )
+        ax.set_aspect("auto")
         plt.xticks(rotation=45, ha="right")
         plt.yticks(rotation=45)
         plt.xlabel("new labels (overclustering)")
