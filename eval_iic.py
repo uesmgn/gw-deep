@@ -89,7 +89,7 @@ def main(args):
         cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="pred")[: len(args.labels), :]
         cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="pred")[: len(args.labels), :]
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=[12, 6])
         seaborn.heatmap(
             cm_y,
             ax=ax,
@@ -106,7 +106,7 @@ def main(args):
         plt.savefig(f"cm_{i}.png", dpi=300)
         plt.close()
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=[12, 6])
         seaborn.heatmap(
             cm_w,
             ax=ax,
