@@ -105,7 +105,7 @@ def main(args):
         plt.xlabel("new labels")
         plt.ylabel("true labels")
         plt.tight_layout()
-        plt.savefig(f"cm_{i}_e{epoch}.png")
+        plt.savefig(f"cm_{i}.png")
         plt.close()
 
         fig, ax = plt.subplots()
@@ -122,7 +122,7 @@ def main(args):
         plt.xlabel("new labels (overclustering)")
         plt.ylabel("true labels")
         plt.tight_layout()
-        plt.savefig(f"cm_over_{i}_e{epoch}.png")
+        plt.savefig(f"cm_over_{i}.png")
         plt.close()
 
     # print(f"Plotting 2D latent features with true labels...")
