@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as tf
 from collections import defaultdict
 from tqdm import tqdm
+import seaborn
 
 from sklearn.manifold import TSNE
 from sklearn.metrics import silhouette_samples, confusion_matrix
@@ -86,10 +87,43 @@ def main(args):
 
     for i in range(args.num_heads):
         py_i, pw_i = py[:, i], pw[:, i]
-        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)))
-        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)))
-        cm_y = cm_y[: args.num_classes, :]
-        cm_w = cm_w[: args.num_classes, :]
+        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)))[: args.num_classes, :]
+        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)))[: args.num_classes, :]
+
+        fig, ax = plt.subplots()
+        seaborn.heatmap(
+            normalize(cm_y, axis=0),
+            ax=ax,
+            annot=cm_y,
+            linewidths=0.1,
+            linecolor="gray",
+            cmap="afmhot_r",
+            cbar=True,
+            cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
+        )
+        plt.yticks(rotation=45)
+        plt.xlabel("new labels")
+        plt.ylabel("true labels")
+        plt.tight_layout()
+        plt.savefig(f"cm_{i}_e{epoch}.png")
+        plt.close()
+
+        fig, ax = plt.subplots()
+        seaborn.heatmap(
+            normalize(cm_w, axis=0),
+            ax=ax,
+            annot=cm_w,
+            linewidths=0.1,
+            linecolor="gray",
+            cmap="afmhot_r",
+            cbar=True,
+            cbar_kws={"aspect": 50, "pad": 0.01, "anchor": (0, 0.05)},
+        )
+        plt.xlabel("new labels (overclustering)")
+        plt.ylabel("true labels")
+        plt.tight_layout()
+        plt.savefig(f"cm_over_{i}_e{epoch}.png")
+        plt.close()
 
     # print(f"Plotting 2D latent features with true labels...")
     # z_tsne = TSNE(n_components=2, random_state=args.random_state).fit(z).embedding_
