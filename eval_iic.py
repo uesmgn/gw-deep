@@ -143,7 +143,7 @@ def main(args):
         )
         pos = (y_lower + y_upper) / 2
         sil_pos.append(pos)
-        y_lower = y_upper + 100
+        y_lower = y_upper + 50
     ax.set_xlabel("silhouette coefficients")
     ax.set_ylabel("labels")
     ax.set_ylim([0, y_upper])
