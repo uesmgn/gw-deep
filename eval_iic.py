@@ -87,8 +87,8 @@ def main(args):
 
     for i in range(args.num_heads):
         py_i, pw_i = py[:, i], pw[:, i]
-        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="true")[: args.num_classes, :]
-        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="true")[: args.num_classes, :]
+        cm_y = confusion_matrix(y, py_i, labels=list(range(args.num_classes)), normalize="pred")[: len(args.labels), :]
+        cm_w = confusion_matrix(y, pw_i, labels=list(range(args.num_classes_over)), normalize="pred")[: len(args.labels), :]
 
         fig, ax = plt.subplots()
         seaborn.heatmap(
