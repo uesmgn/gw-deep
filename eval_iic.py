@@ -140,7 +140,7 @@ def main(args):
         sil_pos.append(pos)
         y_lower = y_upper + 50
     ax.set_xlabel("silhouette coefficients")
-    ax.set_ylabel("labels")
+    ax.set_ylabel("index of data")
     ax.set_ylim([y_upper, 0])
     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     plt.tight_layout()
