@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as tf
 from collections import defaultdict
+from tqdm import tqdm
 
 import src.data.datasets as datasets
 import src.nn.models as models
@@ -19,10 +20,6 @@ plt.rc("legend", fontsize=10)
 
 @hydra.main(config_path="config", config_name="iic")
 def main(args):
-    if args.verbose:
-        from tqdm import tqdm
-    else:
-        tqdm = lambda x: x
 
     transform = tf.Compose(
         [

@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as tf
 from collections import defaultdict
+from tqdm import tqdm
 
 import src.data.datasets as datasets
 import src.nn.models as models
@@ -28,11 +29,6 @@ def main(args):
 
     wandb_init(args.wandb)
     wandb.config.update(F.flatten(args))
-
-    if args.verbose:
-        from tqdm import tqdm
-    else:
-        tqdm = lambda x: x
 
     transform = tf.Compose(
         [

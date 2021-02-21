@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms as tf
 from collections import defaultdict
+from tqdm import tqdm
 
 from sklearn.manifold import TSNE
 
@@ -21,10 +22,6 @@ plt.rc("legend", fontsize=10)
 
 @hydra.main(config_path="config", config_name="vae")
 def main(args):
-    if args.verbose:
-        from tqdm import tqdm
-    else:
-        tqdm = lambda x: x
 
     transform = tf.Compose(
         [
@@ -66,8 +63,8 @@ def main(args):
     with torch.no_grad():
         for x, target in tqdm(test_loader):
             x = x.to(device, non_blocking=True)
-            z_mb, _ = model.params(x)
-            z.append(z_mb)
+            z_m, _ = model.params(x)
+            z.append(z_m)
             y.append(target)
     z = torch.cat(z).cpu().numpy()
     y = torch.cat(y).cpu().numpy().astype(int)
@@ -84,7 +81,7 @@ def main(args):
     ax.legend(bbox_to_anchor=(1.01, 1.0), loc="upper left")
     ax.set_aspect(1.0 / ax.get_data_ratio())
     plt.tight_layout()
-    plt.savefig(f"z_tsne_{os.path.basename(args.trained_model_file)}.png")
+    plt.savefig(f"z_tsne.png")
     plt.close()
 
 

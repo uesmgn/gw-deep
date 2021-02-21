@@ -36,27 +36,31 @@ class IIC(BaseModule):
             nn.Linear(in_dim, out_dim),
         )
 
-    def forward(self, x, *args, lam=1.0, z_detach=False):
+    def forward(self, x, *args, lam=1.0, z_detach=False, reduction="mean"):
         _, z_x, _ = self.encoder(x)
         if z_detach:
             z_x = z_x.detach()
         w_x = self.clustering(z_x)
         w_x_over = self.over_clustering(z_x)
-        if self.training:
-            mi, mi_over, n = 0, 0, 0
-            for y in args:
-                _, z_y, _ = self.encoder(y)
-                if z_detach:
-                    z_y = z_y.detach()
-                w_y = self.clustering(z_y)
-                w_y_over = self.over_clustering(z_y)
-                mi += self.mutual_info(w_x, w_y, lam=lam)
-                mi_over += self.mutual_info(w_x_over, w_y_over, lam=lam)
-                n += 1
-            mi, mi_over = mi / n, mi_over / n
-            return mi, mi_over
-        else:
-            return z_x, w_x, w_x_over
+        mi, mi_over, n = 0, 0, 0
+        for y in args:
+            _, z_y, _ = self.encoder(y)
+            if z_detach:
+                z_y = z_y.detach()
+            w_y = self.clustering(z_y)
+            w_y_over = self.over_clustering(z_y)
+            mi += self.mutual_info(w_x, w_y, lam=lam, reduction=reduction)
+            mi_over += self.mutual_info(w_x_over, w_y_over, lam=lam, reduction=reduction)
+            n += 1
+        mi, mi_over = mi / n, mi_over / n
+        return mi, mi_over
+
+    def params(self, x: torch.Tensor):
+        assert not self.training
+        _, z_x, _ = self.encoder(x)
+        w_x = self.clustering(z_x)
+        w_x_over = self.over_clustering(z_x)
+        return w_x, w_x_over, z_x
 
     def clustering(self, x):
         if self.use_multi_heads:
@@ -66,7 +70,7 @@ class IIC(BaseModule):
                 tmp.append(w)
             return torch.stack(tmp, dim=-1)
         else:
-            w = F.softmax(self.classifier(x), dim=-1)
+            w = F.softmax(self.classifier(x), dim=-1).unsqueeze(-1)
             return w
 
     def over_clustering(self, x):
@@ -77,23 +81,19 @@ class IIC(BaseModule):
                 tmp.append(w)
             return torch.stack(tmp, dim=-1)
         else:
-            w = F.softmax(self.over_classifier(x), dim=-1)
+            w = F.softmax(self.over_classifier(x), dim=-1).unsqueeze(-1)
             return w
 
-    def mutual_info(self, x, y, lam=1.0, eps=1e-8):
-        if self.use_multi_heads:
-            p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
-            p = ((p + p.permute(1, 0, 2)) / 2) / p.sum()
-            p[(p < eps).data] = eps
-            _, k, m = x.shape
-            pi = p.sum(dim=1).view(k, -1).expand(k, k, m).pow(lam)
-            pj = p.sum(dim=0).view(k, -1).expand(k, k, m).pow(lam)
+    def mutual_info(self, x, y, lam=1.0, eps=1e-8, reduction="mean"):
+        p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
+        p = ((p + p.permute(1, 0, 2)) / 2) / p.sum()
+        p[(p < eps).data] = eps
+        _, k, m = x.shape
+        pi = p.sum(dim=1).view(k, -1).expand(k, k, m).pow(lam)
+        pj = p.sum(dim=0).view(k, -1).expand(k, k, m).pow(lam)
+        if reduction == "mean":
+            return (p * (torch.log(pi) + torch.log(pj) - torch.log(p))).sum() / m
+        elif reduction == "sum":
+            return (p * (torch.log(pi) + torch.log(pj) - torch.log(p))).sum()
         else:
-            m = 1
-            p = (x.unsqueeze(2) * y.unsqueeze(1)).sum(0)
-            p = ((p + p.t()) / 2) / p.sum()
-            _, k = x.shape
-            p[(p < eps).data] = eps
-            pi = p.sum(dim=1).view(k, 1).expand(k, k).pow(lam)
-            pj = p.sum(dim=0).view(1, k).expand(k, k).pow(lam)
-        return (p * (torch.log(pi) + torch.log(pj) - torch.log(p))).sum() / m
+            return (p * (torch.log(pi) + torch.log(pj) - torch.log(p))).sum([0, 1])

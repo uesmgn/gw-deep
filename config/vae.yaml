@@ -22,6 +22,7 @@ gpu:
   train: 0
   eval: 1
 
+# for evaluation
 trained_model_file: vae_e100.pt
 
 wandb:

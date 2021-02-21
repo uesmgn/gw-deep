@@ -24,6 +24,7 @@ class VAE(BaseModule):
         return bce, kl_gauss
 
     def params(self, x: torch.Tensor):
+        assert not self.training
         z, mean, logvar = self.encoder(x)
         x_rec = self.decoder(z)
         return mean, x_rec
